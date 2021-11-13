@@ -107,16 +107,20 @@ print_usage() {
     echo "       checkout - checkout given branch (default branch: master)" >&2
     echo "       clean    - clean repositories" >&2
     echo "       clone    - clone repos" >&2
-    echo "       info     - print info about repo" >&2
+    echo "       info     - print info about repo (dafault command)" >&2
     echo "       update   - update repositories" >&2
 }
 
-case "$1" in
-    checkout|clean|clone|info|update) COMMAND="$1" ;;
-    *) print_usage; echo "unknown command '$1'" >&2; exit 1 ;;
-esac
+if [ $# -eq 0 ]; then
+    COMMAND=info
+else
+    case "$1" in
+        checkout|clean|clone|info|update) COMMAND="$1" ;;
+        *) print_usage; echo "unknown command '$1'" >&2; exit 1 ;;
+    esac
 
-shift
+    shift
+fi
 
 while getopts ":h-:" OPTCHAR; do
     case "${OPTCHAR}" in
