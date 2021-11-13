@@ -86,7 +86,11 @@ function runCleanOneRepo() {
     echo "---------------------------------------------------"
     echo "REPO:     ${1}"
     cd $1
-    git-clean-repo.sh
+    git fetch --prune
+    git reflog expire --all --expire=now
+    git prune
+    git fsck --unreachable
+    git gc
     cd ..
 }
 
