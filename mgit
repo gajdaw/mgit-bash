@@ -106,7 +106,7 @@ function runDeleteMergedBranchesOneRepo() {
     echo "---------------------------------------------------"
     echo "REPO:     ${1}"
     cd $1
-    git branch --merged | egrep -v "(^\*)" | xargs git branch -d
+    (git branch --merged | egrep -v "(^\*)" | xargs git branch -d) || true
     cd ..
 }
 
