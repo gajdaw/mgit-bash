@@ -102,6 +102,22 @@ function runClean() {
     done
 }
 
+function runDeleteMergedBranchesOneRepo() {
+    echo "---------------------------------------------------"
+    echo "REPO:     ${1}"
+    cd $1
+    (git branch --merged | egrep -v "(^\*)" | xargs git branch -d) || true
+    cd ..
+}
+
+function runDeleteMergedBranches() {
+    cd ..
+    for ex in "${SELECTED_REPOS[@]}"
+    do
+        runDeleteMergedBranchesOneRepo ${ex}
+    done
+}
+
 ############################################################
 ### APPLICATION ############################################
 ############################################################
@@ -111,6 +127,7 @@ print_usage() {
     echo "       checkout - checkout given branch (default branch: master)" >&2
     echo "       clean    - clean repositories" >&2
     echo "       clone    - clone repos" >&2
+    echo "       delete   - delete merged branches" >&2
     echo "       info     - print info about repo (dafault command)" >&2
     echo "       update   - update repositories" >&2
 }
@@ -119,7 +136,7 @@ if [ $# -eq 0 ]; then
     COMMAND=info
 else
     case "$1" in
-        checkout|clean|clone|info|update) COMMAND="$1" ;;
+        checkout|clean|clone|delete|info|update) COMMAND="$1" ;;
         *) print_usage; echo "unknown command '$1'" >&2; exit 1 ;;
     esac
 
@@ -158,20 +175,23 @@ which realpath xargs dirname tee git curl > /dev/null
 # SELF=$(realpath "$0" | xargs dirname) && cd $SELF/
 
 case "${COMMAND}" in
-    info)
-        (runInfo)
+    checkout)
+        (runCheckout)
+    ;;
+    clean)
+        (runClean)
     ;;
     clone)
         (runClone)
     ;;
-    checkout)
-        (runCheckout)
+    delete)
+        (runDeleteMergedBranches)
+    ;;
+    info)
+        (runInfo)
     ;;
     update)
         (runUpdate)
-    ;;
-    clean)
-        (runClean)
     ;;
 esac
 
