@@ -1,0 +1,168 @@
+#!/usr/bin/env bash
+
+. mgit-config.sh
+
+: ${REPOS:=all}
+: ${BRANCH:=master}
+
+set -o errexit
+
+print_usage() {
+    echo "USAGE: $0 [-h/--help] {checkout,clean,clone,info,update} [--repos=<value>] [--branch=<value>]" >&2
+    echo "       checkout - checkout given branch (default branch: master)" >&2
+    echo "       clean    - clean repositories" >&2
+    echo "       clone    - clone repos" >&2
+    echo "       info     - print info about repo" >&2
+    echo "       update   - update repositories" >&2
+}
+
+case "$1" in
+    checkout|clean|clone|info|update) COMMAND="$1" ;;
+    *) print_usage; echo "unknown command '$1'" >&2; exit 1 ;;
+esac
+
+shift
+
+while getopts ":h-:" OPTCHAR; do
+    case "${OPTCHAR}" in
+        h) print_usage; exit 0 ;;
+        -)
+            case "${OPTARG}" in
+                help) print_usage; exit 0 ;;
+                repos) REPOS="${!OPTIND}"; ((OPTIND++)) ;;
+                repos=*) REPOS="${OPTARG#*=}" ;;
+                branch) BRANCH="${!OPTIND}"; ((OPTIND++)) ;;
+                branch=*) BRANCH="${OPTARG#*=}" ;;
+                *) print_usage; echo "unknown option '--${OPTARG}'" >&2; exit 1 ;;
+            esac
+        ;;
+        *) print_usage; echo "unknown option '-${OPTARG}'" >&2; exit 1 ;;
+    esac
+done
+
+case "${REPOS}" in
+    all) SELECTED_REPOS=(${REPOS_ALL[@]}) ;;
+    product) SELECTED_REPOS=(${REPOS_PRODUCT[@]}) ;;
+    *) print_usage; echo "unknown value for --repos option" >&2; exit 1 ;;
+esac
+
+
+set -o nounset -o pipefail
+
+# pre-checks (osx: for realpath use: brew install coreutils)
+which realpath xargs dirname tee git curl > /dev/null
+
+# SELF=$(realpath "$0" | xargs dirname) && cd $SELF/
+
+case "${COMMAND}" in
+    info)
+        (runExamplesInfo)
+    ;;
+    clone)
+        (runClone)
+    ;;
+    checkout)
+        (runCheckout)
+    ;;
+    update)
+        (runUpdate)
+    ;;
+    clean)
+        (runClean)
+    ;;
+esac
+
+############################################################
+###LIBRARY##################################################
+############################################################
+
+
+function runInfoForOneRepo() {
+    echo "---------------------------------------------------"
+    echo "REPO:      ${1}"
+    cd $1
+    echo -n "STATUS:    "
+    git status -sb
+    echo -n "REV-PARSE: "
+    git rev-parse HEAD
+    echo -n "DESCRIBE:  "
+    git describe --tags
+    cd ..
+}
+
+function runExamplesInfo() {
+    cd ..
+    for ex in "${SELECTED_REPOS[@]}"
+    do
+        runInfoForOneRepo ${ex}
+    done
+}
+
+
+function runCloneForOneRepo() {
+    echo "---------------------------------------------------"
+    echo "REPO:     ${1}"
+    git clone ${BASE_GIT_URL}${1}.git || true
+}
+
+function runClone() {
+    cd ..
+    for ex in "${SELECTED_REPOS[@]}"
+    do
+        runCloneForOneRepo ${ex}
+    done
+}
+
+function runCheckoutOneRepo() {
+    echo "---------------------------------------------------"
+    echo "REPO:     ${1}"
+    cd $1
+    git checkout $2 || true
+    cd ..
+}
+
+function runCheckout() {
+    cd ..
+    for ex in "${SELECTED_REPOS[@]}"
+    do
+        runCheckoutOneRepo ${ex} $BRANCH
+    done
+}
+
+function runUpdateOneRepo() {
+    echo "---------------------------------------------------"
+    echo "REPO:     ${1}"
+    cd $1
+    git fetch
+    git reset --hard >/dev/null
+    git clean -df >/dev/null
+    git rebase >/dev/null
+    cd ..
+}
+
+function runUpdate() {
+    cd ..
+    for ex in "${SELECTED_REPOS[@]}"
+    do
+        runUpdateOneRepo ${ex}
+    done
+}
+
+function runCleanOneRepo() {
+    echo "---------------------------------------------------"
+    echo "REPO:     ${1}"
+    cd $1
+    git-clean-repo.sh
+    cd ..
+}
+
+function runClean() {
+    cd ..
+    for ex in "${SELECTED_REPOS[@]}"
+    do
+        runCleanOneRepo ${ex}
+    done
+}
+
+
+## vim:ts=4:sw=4:et:syn=sh:
