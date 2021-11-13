@@ -72,3 +72,11 @@ Check out `hotfix` branch in repos included in `product` group:
 
     cd lorem/multi-git-config
     mgit checkout --repos=product --branch=hotfix
+
+## Regular cleanup tasks
+
+    cd lorem/multi-git-config
+    mgit checkout
+    mgit update
+    mgit delete
+    mgit clean
