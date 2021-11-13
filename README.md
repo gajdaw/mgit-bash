@@ -12,50 +12,63 @@ Assumptions:
     brew install gnu-getopt
     brew link --force gnu-getopt
 
-## Config
+## Install & Config
 
-Update `mgit-vars.sh` repo with appropriate values, for example:
+Clone `multi-git` repo and add `mgit` to your path.
+
+Let's assume that you need to work with the following repositories:
+
+      git@github.com:lorem/backend
+      git@github.com:lorem/frontend
+      git@github.com:lorem/documentation
+      git@github.com:lorem/infra
+
+Create a new directory for all the repos and for `mgit` config:
+
+    cd
+    mkdir lorem
+    mkdir lorem/multi-git-config
+
+
+Create `lorem/multi-git-config/mgit-config.sh` file with appropriate values, for example:
 
     REPOS_ALL=(
-      documentation
-      api
       backend
       frontend
+      documentation
       infra
-      technical
     )
     
     REPOS_PRODUCT=(
-      api
       backend
       frontend
     )
     
     BASE_GIT_URL=git@github.com:lorem/
 
-
 ## Run
+
+Clone all repositories:
+
+    cd lorem/multi-git-config
+    mgit clone
 
 Check state of all the repos:
 
-    ./mgit.sh info
+    cd lorem/multi-git-config
+    mgit info
     
 Check out default branch in all the repos:
 
-    ./mgit.sh checkout
-    
-Clone all the repos:
-
-    ./mgit.sh clone
+    cd lorem/multi-git-config
+    mgit checkout
     
 Check state of repos included in `product` group:    
-    
-    ./mgit.sh info --repos=product
 
-Clone repos included in `product` group:    
-
-    ./mgit.sh clone --repos=product
+    cd lorem/multi-git-config
+    mgit info --repos=product
 
 Check out `hotfix` branch in repos included in `product` group:
 
-    ./mgit.sh checkout --repos=product --branch=hotfix
+    cd lorem/multi-git-config
+    mgit checkout --repos=product --branch=hotfix
