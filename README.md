@@ -5,7 +5,7 @@ Assumptions:
 
 - all repos share the same URL prefix (e.g. `git@github.com:lorem/`)
 - all repos reside in the same main directory
-- main directory contains `multi-git` repo
+- main directory contains `multi-git-config` directory
 
 ## Install getopts
 
